@@ -442,6 +442,7 @@ void USART2_Init(uint32_t speed, uint8_t inten)
         /* Enable the USART2 Receive interrupt: this interrupt is generated when the
                      USART2 receive data register is not empty */
         USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+        //USART_ITConfig(USART2, USART_IT_TXNE, ENABLE);
 
         /* Enable the USART2 Interrupt */
         NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
