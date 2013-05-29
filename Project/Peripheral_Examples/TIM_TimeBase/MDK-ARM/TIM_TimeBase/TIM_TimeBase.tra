@@ -1,0 +1,33 @@
+*** Creating Trace Output File '.\TIM_TimeBase\TIM_TimeBase.tra' Ok.
+### Preparing for ADS-LD.
+### Creating ADS-LD Command Line
+### List of Objects: adding '".\tim_timebase\startup_stm32f30x.o"'
+### List of Objects: adding '".\tim_timebase\stm32f3_discovery.o"'
+### List of Objects: adding '".\tim_timebase\stm32f30x_dac.o"'
+### List of Objects: adding '".\tim_timebase\stm32f30x_dma.o"'
+### List of Objects: adding '".\tim_timebase\stm32f30x_exti.o"'
+### List of Objects: adding '".\tim_timebase\stm32f30x_gpio.o"'
+### List of Objects: adding '".\tim_timebase\stm32f30x_misc.o"'
+### List of Objects: adding '".\tim_timebase\stm32f30x_opamp.o"'
+### List of Objects: adding '".\tim_timebase\stm32f30x_rcc.o"'
+### List of Objects: adding '".\tim_timebase\stm32f30x_syscfg.o"'
+### List of Objects: adding '".\tim_timebase\stm32f30x_tim.o"'
+### List of Objects: adding '".\tim_timebase\stm32f30x_wwdg.o"'
+### List of Objects: adding '".\tim_timebase\main.o"'
+### List of Objects: adding '".\tim_timebase\system_stm32f30x.o"'
+### ADS-LD Command completed:
+--cpu Cortex-M4.fp ".\tim_timebase\startup_stm32f30x.o" ".\tim_timebase\stm32f3_discovery.o" ".\tim_timebase\stm32f30x_dac.o" ".\tim_timebase\stm32f30x_dma.o" ".\tim_timebase\stm32f30x_exti.o" ".\tim_timebase\stm32f30x_gpio.o" ".\tim_timebase\stm32f30x_misc.o" ".\tim_timebase\stm32f30x_opamp.o" ".\tim_timebase\stm32f30x_rcc.o" ".\tim_timebase\stm32f30x_syscfg.o" ".\tim_timebase\stm32f30x_tim.o" ".\tim_timebase\stm32f30x_wwdg.o" ".\tim_timebase\main.o" ".\tim_timebase\system_stm32f30x.o" 
+--library_type=microlib --strict --scatter ".\TIM_TimeBase\TIM_TimeBase.sct" 
+--summary_stderr --info summarysizes --map --xref --callgraph --symbols 
+--info sizes --info totals --info unused --info veneers 
+ --list ".\TIM_TimeBase\TIM_TimeBase.map" -o .\TIM_TimeBase\TIM_TimeBase.axf### Preparing Environment (PrepEnvAds)
+### ADS-LD Output File: '.\TIM_TimeBase\TIM_TimeBase.axf'
+### ADS-LD Command File: '.\TIM_TimeBase\TIM_TimeBase.lnp'
+### Checking for dirty Components...
+### Creating CmdFile '.\TIM_TimeBase\TIM_TimeBase.lnp', Handle=0x00000B3C
+### Writing '.lnp' file
+### ADS-LD Command file '.\TIM_TimeBase\TIM_TimeBase.lnp' is ready.
+### ADS-LD: About to start ADS-LD Thread.
+### ADS-LD: executed with 0 errors
+### Updating obj list
+### LDADS_file() completed.

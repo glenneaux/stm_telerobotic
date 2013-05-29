@@ -1,0 +1,5 @@
+--cpu Cortex-M4.fp ".\tim_timebase\startup_stm32f30x.o" ".\tim_timebase\stm32f3_discovery.o" ".\tim_timebase\stm32f30x_dac.o" ".\tim_timebase\stm32f30x_dma.o" ".\tim_timebase\stm32f30x_exti.o" ".\tim_timebase\stm32f30x_gpio.o" ".\tim_timebase\stm32f30x_misc.o" ".\tim_timebase\stm32f30x_opamp.o" ".\tim_timebase\stm32f30x_rcc.o" ".\tim_timebase\stm32f30x_syscfg.o" ".\tim_timebase\stm32f30x_tim.o" ".\tim_timebase\stm32f30x_wwdg.o" ".\tim_timebase\main.o" ".\tim_timebase\system_stm32f30x.o" 
+--library_type=microlib --strict --scatter ".\TIM_TimeBase\TIM_TimeBase.sct" 
+--summary_stderr --info summarysizes --map --xref --callgraph --symbols 
+--info sizes --info totals --info unused --info veneers 
+ --list ".\TIM_TimeBase\TIM_TimeBase.map" -o .\TIM_TimeBase\TIM_TimeBase.axf
