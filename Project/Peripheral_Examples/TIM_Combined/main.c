@@ -32,13 +32,12 @@
 #include <string.h>
 #include <stdio.h>
 
-/** @addtogroup STM32F3_Discovery_Peripheral_Examples
-  * @{
-  */
-
 /** @addtogroup TIM_Combined
   * @{
   */ 
+
+
+
 	
 uint8_t rx_buffer[RX_BUFFER_LENGTH];
 uint8_t rx_counter = 0;
@@ -456,22 +455,6 @@ void USART2_Init(uint32_t speed, uint8_t inten)
     USART_Cmd(USART2, ENABLE);
 }
 
-/**
- * @brief  Retargets the C library printf function to the USART.
- *                      Overwrite __io_putchar function used by printf
- * @param  None
- * @retval None
- */
-PUTCHAR_PROTOTYPE
-{
-    /* Put character on the serial line */
-    USART2->TDR = (ch & (uint16_t)0x01FF);
-
-    /* Loop until transmit data register is empty */
-    while ((USART2->ISR & USART_FLAG_TXE) == (uint16_t) RESET);
-
-    return ch;
-}
 
 /**
  * @brief  This function handles USART2 global interrupt request.
@@ -499,11 +482,5 @@ void USART2_IRQHandler(void)
     }
 }
 
-
-uint8_t USART2_ReadChar(void)
-{
-    while(USART_GetFlagStatus(USART2, USART_FLAG_RXNE) == RESET);
-    return USART_ReceiveData(USART2);
-}
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
