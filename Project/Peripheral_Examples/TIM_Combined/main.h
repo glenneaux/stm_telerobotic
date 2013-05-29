@@ -56,7 +56,6 @@
 
 #define RX_BUFFER_LENGTH        (40)
 
-extern PUTCHAR_PROTOTYPE;
 extern void USART2_Init(uint32_t speed, uint8_t inten);
 extern void USART2_IRQHandler(void);
 extern uint8_t USART2_ReadChar(void);
