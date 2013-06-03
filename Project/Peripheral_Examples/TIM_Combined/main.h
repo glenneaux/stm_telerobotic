@@ -46,19 +46,17 @@
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-#ifdef __GNUC__
-/* With GCC/RAISONANCE, small printf (option LD Linker->Libraries->Small printf
-     set to 'Yes') calls __io_putchar() */
-#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
-#else
-#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
-#endif /* __GNUC__ */
+
 
 #define RX_BUFFER_LENGTH        (40)
 
 extern void USART2_Init(uint32_t speed, uint8_t inten);
 extern void USART2_IRQHandler(void);
 extern uint8_t USART2_ReadChar(void);
+
+static float MAX_ANGLE=45.0f;
+void updateChan(float angle, int chan);
+
 #endif /* __MAIN_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
