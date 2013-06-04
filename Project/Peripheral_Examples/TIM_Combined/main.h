@@ -50,13 +50,13 @@
 
 #define RX_BUFFER_LENGTH        (40)
 
-extern void USART2_Init(uint32_t speed, uint8_t inten);
+extern void USART2_Init(void);
 extern void USART2_IRQHandler(void);
 extern uint8_t USART2_ReadChar(void);
-
-static float MAX_ANGLE=45.0f;
+void writeSerial(void);
+static float MAX_ANGLE=15.0f;
 void updateChan(float angle, int chan);
-
+void processRx(void);
 #endif /* __MAIN_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
