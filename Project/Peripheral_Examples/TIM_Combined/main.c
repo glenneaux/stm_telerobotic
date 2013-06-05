@@ -32,15 +32,16 @@ degrees)
 #include <stdio.h>
 #define PI                         (float)     3.14159265f
 uint8_t rx_buffer[RX_BUFFER_LENGTH];
-uint8_t rx_counter = 0;
-int rxState = -1;
+uint8_t rx_counter = 0, rxBuf;
+uint8_t rxState = 0;
 
 
 uint16_t TimerPeriod = 0;
 uint16_t Channel1Pulse = 0, Channel2Pulse = 0, Channel3Pulse = 0, Channel5Pulse = 0;
 int remoteStale = 1;
 float AccBuffer[3] = {0.0f};
-
+	int valNeg = 0;
+	uint8_t temp;
 struct outputSettings //Values in microseconds (uS)
 {
 	int neutral;
@@ -103,8 +104,11 @@ int main(void)
 		
 		RollAng = (atan2(-AccBuffer[1], AccBuffer[2])*180.0)/PI;
 		PitchAng =  (atan2(AccBuffer[0], sqrt(AccBuffer[1]*AccBuffer[1] + AccBuffer[2]*AccBuffer[2]))*180.0)/PI;
+					PitchAng=clampVal(PitchAng);
+			RollAng=clampVal(RollAng);
 		writeRoll = RollAng;
 		writePitch = PitchAng;
+		
 		// check is remote data is stale. if it's NOT stale add it to computer angled
 		//if(remoteStale == 0)
 		//{
@@ -113,15 +117,18 @@ int main(void)
 		//}
 		
 		// Clamp values to +/- maximum angle (MAX_ANGLE)
-		if(PitchAng>MAX_ANGLE)
+		/*if(PitchAng>MAX_ANGLE)
 			PitchAng=MAX_ANGLE;
 		if(PitchAng<-MAX_ANGLE)
 			PitchAng=-MAX_ANGLE;
 		if(RollAng>MAX_ANGLE)
 			RollAng=MAX_ANGLE;
 		if(RollAng<-MAX_ANGLE)
-			RollAng=-MAX_ANGLE;
-		
+			RollAng=-MAX_ANGLE;*/
+			PitchAng=clampVal(PitchAng);
+			RollAng=clampVal(RollAng);
+			
+
 		//TODO Output reading to serial port
 		// sending will block the main program which is acceptable because we have lots of time.
 		
@@ -129,7 +136,7 @@ int main(void)
 		//Calculate desired channel outpus in uS reading according to servo range/output requirements
 		updateChan(PitchAng, 0);
 		updateChan(RollAng, 1);
-		//writeSerial();
+		writeSerial();
 		//Set Servo timer output pulse widths
 		TIM_SetCompare1(TIM1, (int)(outputChannels[0].current*3.13));
 		TIM_SetCompare2(TIM1, (int)(outputChannels[1].current*3.13));
@@ -167,12 +174,13 @@ void writeSerial(void)
 		
 	//write packet header
 	// Need to find out how to wait for tx to happen.
+	while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET);
 	USART_SendData(USART2, 255);
-	for (i=1 ; i<10000 ; i++){}
+	while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET);
 	USART_SendData(USART2, Pitchoutput);
-	for (i=1 ; i<10000 ; i++){}
+	while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET);
 	USART_SendData(USART2, Rolloutput);
-	for (i=1 ; i<600000 ; i++){}
+
 	
 	
 	
@@ -314,17 +322,46 @@ void USART2_IRQHandler(void)
 {
     if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
     {		
-				/* Read one byte from the receive data register */
-				rx_buffer[rx_counter] = (USART_ReceiveData(USART2));
-				USART_SendData(USART2, rx_buffer[rx_counter]);
+			/* Read one byte from the receive data register */
+				
+			//rx_buffer[rx_counter] = (USART_ReceiveData(USART2));
+			rxBuf = USART_ReceiveData(USART2);
+			//USART_SendData(USART2, rxBuf);
 			
+			if(rxBuf == 0xFF)
+			{
+				// got header
+				rxState = 1;
+				rx_counter = 0;
+			}else{
+				// if rxState = 0, do nothing.
+				if(rxState == 1)
+				{
+					// rxState = 0. We have header. 
+					// Write byte, increment counter.
+					rx_buffer[rx_counter] = rxBuf;
+					rx_counter++;
+					
+					
+				}
+			}
+			//check if rx_counter is 1. If it is process the 2 bytes rx_buffer[0] and rx_buffer[1].
+			//set rx_state -1.
+			if(rx_counter==2)
+			{
+				// have data process 2 bytes.
+				processRx(); 
+				
+				//clear rx_state
+				rxState = 0;
+			}
 			
 			// check rx state.
 			// -1 means no header
 			// 0 means got header
 			// 1 means got first byte
 			// 2 means got 2nd byte
-			
+			/*
         if(rx_counter + 1 == RX_BUFFER_LENGTH ||
                 rx_buffer[rx_counter] == '\n' || rx_buffer[rx_counter] == '\r')
         {
@@ -355,36 +392,48 @@ void USART2_IRQHandler(void)
 					}						
 					
 					rx_counter++;
-        }
+        }*/
     }
 }
-
+float clampVal(float val)
+		{
+			if(val>MAX_ANGLE)
+			val=MAX_ANGLE;
+			if(val<-MAX_ANGLE)
+			val=-MAX_ANGLE;
+			
+			return val;
+		}
 void processRx(void)
 {
-	int valNeg = 0;
-	uint8_t temp;
+
 	//So for example a packet 11111111 (Header) 01111000 (Tilt angle of -(15*120/120)= -15 degrees) 10111100 (Roll angle of + (15*60/120) = +7.5 
 	//Check pos/neg bit.
 	//Clear bit, translate 120number into angle, set sign.
-	valNeg = rx_buffer[rx_counter-1] & (1 << 7);
+	valNeg = !!(rx_buffer[0] & (1 << 7));
+
 	if(valNeg == 1){
 		valNeg = -1;
+	}else{
+		valNeg =1;
 	}
 	
-	temp = rx_buffer[rx_counter-1]; //import tilt angle
+	temp = rx_buffer[0]; //import tilt angle
 	temp &= ~(1 << 7); //clear bit
 	//temp is now 0-120 (should be)
-	externalPitchAng = (float)((MAX_ANGLE*120)/120)*valNeg;
+	externalPitchAng = (float)((MAX_ANGLE*temp)/120)*valNeg;
 	
-	valNeg = rx_buffer[rx_counter] & (1 << 7);
+	valNeg = !!(rx_buffer[1] & (1 << 7));
 	if(valNeg == 1){
 		valNeg = -1;
+	}else{
+		valNeg =1;
 	}
 	
-	temp = rx_buffer[rx_counter]; //import roll angle
+	temp = rx_buffer[1]; //import roll angle
 	temp &= ~(1 << 7); //clear bit
 	//temp is now 0-120 (should be)
-	externalRollAng = (float)((MAX_ANGLE*120)/120)*valNeg;
+	externalRollAng = (float)((MAX_ANGLE*temp)/120)*valNeg;
 	return;
 }
 

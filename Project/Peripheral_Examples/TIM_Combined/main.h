@@ -57,6 +57,7 @@ void writeSerial(void);
 static float MAX_ANGLE=15.0f;
 void updateChan(float angle, int chan);
 void processRx(void);
+float clampVal(float val);
 #endif /* __MAIN_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
