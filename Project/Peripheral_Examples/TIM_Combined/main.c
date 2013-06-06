@@ -65,14 +65,14 @@ int main(void)
        To reconfigure the default setting of SystemInit() function, refer to
        system_stm32f30x.c file
      */ 
-	outputChannels[0].neutral = 1500;
+	outputChannels[0].neutral = 1700;
 	outputChannels[0].current = outputChannels[0].neutral;
-	outputChannels[0].min = 1000;
-	outputChannels[0].max = 2000;
+	outputChannels[0].min = 1500;
+	outputChannels[0].max = 1900;
 	outputChannels[1].neutral = 1500;
 	outputChannels[1].current = outputChannels[1].neutral;
-	outputChannels[1].min = 1000;
-	outputChannels[1].max = 2000;
+	outputChannels[1].min = 1700;
+	outputChannels[1].max = 1300;
 
    /* TIM Configuration */
   TIM_Config();
@@ -110,11 +110,18 @@ int main(void)
 		writePitch = PitchAng;
 		
 		// check is remote data is stale. if it's NOT stale add it to computer angled
-		//if(remoteStale == 0)
-		//{
-    PitchAng+=(float)externalPitchAng;
-		RollAng+=(float)externalRollAng;
-		//}
+		if(remoteStale == 0)
+		{
+    PitchAng=(float)externalPitchAng;
+		RollAng=(float)externalRollAng;
+		}else{
+
+			externalPitchAng = 0.0f;
+			externalRollAng = 0.0f;
+			PitchAng+=(float)externalPitchAng;
+			RollAng+=(float)externalRollAng;
+		}
+		
 		
 		// Clamp values to +/- maximum angle (MAX_ANGLE)
 		/*if(PitchAng>MAX_ANGLE)
@@ -134,6 +141,7 @@ int main(void)
 		
 		
 		//Calculate desired channel outpus in uS reading according to servo range/output requirements
+		
 		updateChan(PitchAng, 0);
 		updateChan(RollAng, 1);
 		writeSerial();
@@ -247,6 +255,25 @@ uint32_t LSM303DLHC_TIMEOUT_UserCallback(void)
 /**
   * @}
   */ 
+
+void TIM2_IRQHandler(void)
+{
+  if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)
+  {
+    TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+		//writeSerial();
+		// if data is > 0.5 second old we consider the remote tx disconnected.
+		// if remoteStale = 0 then its dead.
+		if(remoteStale == 0){
+			remoteStale = 1;
+		}
+		
+		// force remotestlae to 1 rx will reset it for us.
+    /* Whatever */
+
+    //STM32vldiscovery_LEDToggle(LED3);
+  }
+}
 
 /**
  * @brief  This function initializes USART2 module
@@ -406,7 +433,8 @@ float clampVal(float val)
 		}
 void processRx(void)
 {
-
+	// we are processing received data so remote data is not stale any more
+	remoteStale = 0;
 	//So for example a packet 11111111 (Header) 01111000 (Tilt angle of -(15*120/120)= -15 degrees) 10111100 (Roll angle of + (15*60/120) = +7.5 
 	//Check pos/neg bit.
 	//Clear bit, translate 120number into angle, set sign.

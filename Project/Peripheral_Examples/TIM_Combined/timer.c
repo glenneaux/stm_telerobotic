@@ -43,6 +43,7 @@ extern void TIM_Config(void)
 	
 TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
 TIM_OCInitTypeDef TIM_OCInitStructure;
+NVIC_InitTypeDef NVIC_InitStructure;
 
   /* GPIOA, GPIOB and GPIOE Clocks enable */
   RCC_AHBPeriphClockCmd( RCC_AHBPeriph_GPIOA | RCC_AHBPeriph_GPIOB, ENABLE);
@@ -57,6 +58,16 @@ TIM_OCInitTypeDef TIM_OCInitStructure;
   
   GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF_6);
   GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_6);
+	/* TIM2 clock enable */
+RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+	
+	// Enable TIM2 interupt
+	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	
+	NVIC_Init(&NVIC_InitStructure);
 	
 	
 	/* TIM1 clock enable */
@@ -90,4 +101,16 @@ TIM_OCInitTypeDef TIM_OCInitStructure;
   /* TIM1 Main Output Enable */
   TIM_CtrlPWMOutputs(TIM1, ENABLE);
   
+	//set up TIM2 - .5second interrupts
+	TIM_TimeBaseStructure.TIM_Period = 1000000-1;
+	TIM_TimeBaseStructure.TIM_Prescaler = 42;
+	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	
+	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
+	
+	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+	
+	//enable TIM2Counter
+	TIM_Cmd(TIM2, ENABLE);
 }
