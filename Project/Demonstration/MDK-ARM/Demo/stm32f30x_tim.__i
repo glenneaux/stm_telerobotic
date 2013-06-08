@@ -1,4 +1,0 @@
--c --cpu Cortex-M4.fp -D__EVAL -D__MICROLIB --li -g -O3 --apcs=interwork --split_sections -I.\..\ -I.\..\..\..\Libraries\CMSIS\Device\ST\STM32F30x\Include -I.\..\..\..\Libraries\STM32F30x_StdPeriph_Driver\inc -I.\..\..\..\Libraries\STM32_USB-FS-Device_Driver\inc -I.\..\..\..\Utilities\STM32F3_Discovery 
--I C:\Keil\ARM\RV31\INC 
--I C:\Keil\ARM\CMSIS\Include 
--DUSE_STDPERIPH_DRIVER -DSTM32F30X -o ".\Demo\stm32f30x_tim.o" --omf_browse ".\Demo\stm32f30x_tim.crf" --depend ".\Demo\stm32f30x_tim.d" "..\..\..\Libraries\STM32F30x_StdPeriph_Driver\src\stm32f30x_tim.c"

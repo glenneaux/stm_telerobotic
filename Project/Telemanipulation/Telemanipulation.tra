@@ -1,0 +1,35 @@
+*** Creating Trace Output File '..\Telemanipulation.tra' Ok.
+### Preparing for ADS-LD.
+### Creating ADS-LD Command Line
+### List of Objects: adding '"..\startup_stm32f30x.o"'
+### List of Objects: adding '"..\stm32f3_discovery.o"'
+### List of Objects: adding '"..\stm32f3_discovery_lsm303dlhc.o"'
+### List of Objects: adding '"..\stm32f30x_exti.o"'
+### List of Objects: adding '"..\stm32f30x_gpio.o"'
+### List of Objects: adding '"..\stm32f30x_i2c.o"'
+### List of Objects: adding '"..\stm32f30x_misc.o"'
+### List of Objects: adding '"..\stm32f30x_rcc.o"'
+### List of Objects: adding '"..\stm32f30x_syscfg.o"'
+### List of Objects: adding '"..\stm32f30x_tim.o"'
+### List of Objects: adding '"..\stm32f30x_usart.o"'
+### List of Objects: adding '"..\stm32f30x_it.o"'
+### List of Objects: adding '"..\timer.o"'
+### List of Objects: adding '"..\main.o"'
+### List of Objects: adding '"..\system_stm32f30x.o"'
+### List of Objects: adding '"..\sensor.o"'
+### ADS-LD Command completed:
+--cpu Cortex-M4.fp "..\startup_stm32f30x.o" "..\stm32f3_discovery.o" "..\stm32f3_discovery_lsm303dlhc.o" "..\stm32f30x_exti.o" "..\stm32f30x_gpio.o" "..\stm32f30x_i2c.o" "..\stm32f30x_misc.o" "..\stm32f30x_rcc.o" "..\stm32f30x_syscfg.o" "..\stm32f30x_tim.o" "..\stm32f30x_usart.o" "..\stm32f30x_it.o" "..\timer.o" "..\main.o" "..\system_stm32f30x.o" "..\sensor.o" 
+--library_type=microlib --strict --scatter "..\Telemanipulation.sct" 
+--summary_stderr --info summarysizes --map --xref --callgraph --symbols 
+--info sizes --info totals --info unused --info veneers 
+ --list ".\Telemanipulation\Telemanipulation.map" -o ..\Telemanipulation.axf### Preparing Environment (PrepEnvAds)
+### ADS-LD Output File: '..\Telemanipulation.axf'
+### ADS-LD Command File: '..\Telemanipulation.lnp'
+### Checking for dirty Components...
+### Creating CmdFile '..\Telemanipulation.lnp', Handle=0x00000B94
+### Writing '.lnp' file
+### ADS-LD Command file '..\Telemanipulation.lnp' is ready.
+### ADS-LD: About to start ADS-LD Thread.
+### ADS-LD: executed with 0 errors
+### Updating obj list
+### LDADS_file() completed.
