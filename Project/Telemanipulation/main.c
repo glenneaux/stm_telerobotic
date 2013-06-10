@@ -37,20 +37,27 @@ int remoteStale = 1;
 float AccBuffer[3] = {0.0f};
 	int valNeg = 0;
 
+
+// This structure holds all of the servo position settings in terms of a pulsewidth in uS
+// There was no calibration routine for this, just constants that had to be set by trial and error.
+// After the platform was constructed these values could values could have been measured using
+// another controller and a CRO.
 struct outputSettings //Values in microseconds (uS)
 {
-	int neutral;
-	int min;
-	int max;
-	int current;
+	int neutral; // The neutral position, this should hold that axis in the horizontal plane
+	int min; // platform at -15degrees
+	int max; // platform at +15degrees
+	int current; // The current commanded position/pulsewidth.
 };
 
 struct outputSettings outputChannels[2];
 
-float	RollAng = 0.0f;
-float	PitchAng = 0.0f;
+// commandedAngle[0] = Tilt angle
+// commandedAngle[1] = Roll Angle
 float commandedAngle[2] = {0.0f,0.0f};
-int externalRollAng = 0, externalPitchAng = 0;
+
+// Angles from the remote
+int externalRollAng = 0, externalTiltAng = 0;
 int i=0;
 
 int main(void)
@@ -61,6 +68,7 @@ int main(void)
        To reconfigure the default setting of SystemInit() function, refer to
        system_stm32f30x.c file
      */ 
+	
 	outputChannels[0].neutral = 1700;
 	outputChannels[0].current = outputChannels[0].neutral;
 	outputChannels[0].min = 1500;
@@ -103,12 +111,12 @@ int main(void)
     for(i=0;i<3;i++)
 			AccBuffer[i] /= 100.0f;
 		
-		RollAng = (atan2(-AccBuffer[1], AccBuffer[2])*180.0)/PI;
-		PitchAng =  (atan2(AccBuffer[0], sqrt(AccBuffer[1]*AccBuffer[1] + AccBuffer[2]*AccBuffer[2]))*180.0)/PI;
+		commandedAngle[1] = (atan2(-AccBuffer[1], AccBuffer[2])*180.0)/PI;
+		commandedAngle[0] =  (atan2(AccBuffer[0], sqrt(AccBuffer[1]*AccBuffer[1] + AccBuffer[2]*AccBuffer[2]))*180.0)/PI;
 		
 		// Clamp values to +/- Max Angle.
-		PitchAng=clampVal(PitchAng);
-		RollAng=clampVal(RollAng);
+		commandedAngle[0]=clampVal(commandedAngle[0]);
+		commandedAngle[1]=clampVal(commandedAngle[1]);
 				
 		// Write angles to output
 		writeSerial();
@@ -116,14 +124,13 @@ int main(void)
 		if(remoteStale == 0)
 		{
 			// Add values from external controller to own angles.
-			PitchAng=(float)externalPitchAng;
-			RollAng=(float)externalRollAng;
+			commandedAngle[0]=(float)externalTiltAng;
+			commandedAngle[1]=(float)externalRollAng;
 		}
 		
 		//Update output pulsewidths based on the desired angle.
-		updateChan(PitchAng, 0);
-		updateChan(RollAng, 1);
-		writeSerial();
+		updateChan(commandedAngle[0], 0);
+		updateChan(commandedAngle[1], 1);
 		
 		//Set Servo timer output pulse widths
 		// outputChannels min/max/current/neutral values are stored in uS.
@@ -140,25 +147,25 @@ void writeSerial(void)
 	// send header, tilt, roll.
 	// header is 0xff or 255.
 	// Find Abs of Angle.
-	// abs(RollAng) (sqrt(RollAng*RollAng) - Some unresolved issue with abs() function, work around.
+	// abs(commandedAngle[1]) (sqrt(commandedAngle[1]*commandedAngle[1]) - Some unresolved issue with abs() function, work around.
 	// Normalize angle to 0-1 based on MAX_ANGLE
 	// Multiple Scaled Angle by 120, casting as (char)
 	// Set negative bit (set MSB (7) to 1. value |= 1 << 7;
 	// Bang header and both values to output;
-	char Pitchoutput, Rolloutput;
+	char Tiltoutput, Rolloutput;
 
 	// Had issues with abs() not working.
 	// Using sqrt(val^2) instead for now.
 	// Value is normalized then scaled to our range of possible output vales (120 in this case)
-	Pitchoutput = (char)((sqrt(PitchAng*PitchAng)/MAX_ANGLE)*120);
+	Tiltoutput = (char)((sqrt(commandedAngle[0]*commandedAngle[0])/MAX_ANGLE)*120);
 	
 	// if value is negative (<0) then we must set Bit 7 of the output packet to 1 to signify as such.
- 	if (PitchAng < 0)
-		Pitchoutput |= 1 << 7;
+ 	if (commandedAngle[0] < 0)
+		Tiltoutput |= 1 << 7;
 	
-	Rolloutput = (char)((sqrt(RollAng*RollAng)/MAX_ANGLE)*120);
+	Rolloutput = (char)((sqrt(commandedAngle[1]*commandedAngle[1])/MAX_ANGLE)*120);
 
- 	if (RollAng < 0)
+ 	if (commandedAngle[1] < 0)
 		Rolloutput |= 1 << 7;
 	
 	// When outputting the values this could be rewritten into a loop
@@ -170,7 +177,7 @@ void writeSerial(void)
 	
 	// wait for tx to be ready, write Pitch value to UART
 	while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET);
-	USART_SendData(USART2, Pitchoutput);
+	USART_SendData(USART2, Tiltoutput);
 	
 	// wait for tx to be ready, write Roll value to UART.
 	while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET);
@@ -364,7 +371,6 @@ float clampVal(float val)
 
 // After receiving the header and then 2 bytes.
 // This function will process the values to our actual angle values.
-// This function again could have been simplified if my angles were stored in an array.
 void processRx(void)
 {
 	uint8_t temp;
@@ -395,7 +401,7 @@ void processRx(void)
 	//temp is now 0-120 (should be)
 	// multiple value by our MAX_ANGLE and divide by 120 to scale back to angle value.
 	// Multiple by 1 or -1 depending on if our original value had MSB bit 7 set to 1.
-	externalPitchAng = (float)((MAX_ANGLE*temp)/120)*valNeg;
+	externalTiltAng = (float)((MAX_ANGLE*temp)/120)*valNeg;
 	
 	temp = rx_buffer[1]; //import roll angle
 	valNeg = !!(temp & (1 << 7));
